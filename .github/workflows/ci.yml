@@ -31,6 +31,28 @@ jobs:
         working-directory: viewer
         run: flutter build web --release --no-tree-shake-icons
       - run: dart pub publish --dry-run
+      # .pubignore mistakes silently drop sources from the package.
+      - name: Check every library file is in the package
+        run: |
+          listing=$(dart pub publish --dry-run 2>&1)
+          missing=0
+          for f in $(git ls-files lib); do
+            grep -q "── $(basename "$f") " <<< "$listing" || { echo "Not in the package: $f"; missing=1; }
+          done
+          exit $missing
+
+  pana:
+    # The same analysis pub.dev scores the package with.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: dart pub global activate pana
+      - name: Fail if the pub.dev score would drop by more than 20 points
+        run: dart pub global run pana --no-warning --exit-code-threshold 20 .
 
   go:
     runs-on: ubuntu-latest

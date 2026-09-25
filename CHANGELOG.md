@@ -1,3 +1,9 @@
+## 0.0.2
+
+* Fix the published package missing `lib/src/viewer/`, which broke
+  `package:remote_app_control/viewer.dart` and analysis on pub.dev.
+* Document more of the public API.
+
 ## 0.0.1
 
 * Initial preview: paint-command capture and replay, remote touch, scroll,

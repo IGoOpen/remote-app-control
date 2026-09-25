@@ -50,11 +50,12 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - name: Check the package version matches the tag
-        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      # The npm package is released only when its version matches the tag,
+      # so Dart-only releases leave it alone.
       - id: check
         run: |
-          if npm view "@igoopen/remote-app-control@${GITHUB_REF_NAME#v}" version > /dev/null 2>&1; then
+          version="${GITHUB_REF_NAME#v}"
+          if [ "$(node -p "require('./package.json').version")" != "$version" ]             || npm view "@igoopen/remote-app-control@$version" version > /dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
           fi
       - if: steps.check.outputs.published != 'true'

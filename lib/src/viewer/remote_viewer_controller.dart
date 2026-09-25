@@ -12,12 +12,32 @@ import '../protocol/codec.dart';
 import '../protocol/wire.dart';
 import 'remote_resources.dart';
 
-enum RemoteViewerStatus { idle, connecting, waitingForDevice, connected, disconnected }
+/// Connection state of a [RemoteViewerController].
+enum RemoteViewerStatus {
+  /// Not connected.
+  idle,
 
+  /// Opening the connection to the relay.
+  connecting,
+
+  /// Joined the session; the app has not sent its screen yet, or has left.
+  waitingForDevice,
+
+  /// Receiving the app's screen.
+  connected,
+
+  /// The connection closed; see [RemoteViewerController.error].
+  disconnected,
+}
+
+/// A line of output or an error reported by the remote app.
 class RemoteLog {
   const RemoteLog(this.time, this.isError, this.message);
 
+  /// When the app logged it, on the device's clock.
   final DateTime time;
+
+  /// Whether this is an uncaught error rather than printed output.
   final bool isError;
   final String message;
 }
@@ -27,7 +47,10 @@ class RemoteLog {
 class RemoteFrame {
   const RemoteFrame(this.size, this.root);
 
+  /// The app's size in logical pixels.
   final Size size;
+
+  /// Id of the chunk to draw, in [RemoteResources.chunks].
   final int root;
 }
 
@@ -38,24 +61,34 @@ class RemoteViewerController extends ChangeNotifier {
   RemoteViewerController({this.logLimit = 2000, RemoteFontCache? fontCache})
     : resources = RemoteResources(fontCache: fontCache);
 
+  /// Oldest log entries are dropped beyond this many.
   final int logLimit;
 
   RemoteViewerStatus _status = RemoteViewerStatus.idle;
   RemoteViewerStatus get status => _status;
 
   String? _error;
+
+  /// Why the connection closed or failed, if it did.
   String? get error => _error;
 
   RemoteFrame? _frame;
+
+  /// The latest frame, or null before the app's screen arrives.
   RemoteFrame? get frame => _frame;
 
   Map<String, Object?> _deviceInfo = const {};
+
+  /// What the app reported on joining: `protocol`, `platform` and
+  /// `devicePixelRatio`.
   Map<String, Object?> get deviceInfo => _deviceInfo;
 
   /// Images, styles and fonts sent by the host.
   final RemoteResources resources;
 
   final Queue<RemoteLog> _logs = Queue();
+
+  /// The app's logs and errors, oldest first.
   List<RemoteLog> get logs => _logs.toList(growable: false);
 
   /// Incremented whenever the log list changes, cheap to compare in widgets.
@@ -68,6 +101,8 @@ class RemoteViewerController extends ChangeNotifier {
   // dropped.
   int _generation = 0;
 
+  /// Joins the session with [code] on the relay at [server], for example
+  /// `wss://support.example.com`.
   Future<void> connect({required Uri server, required String code}) async {
     await disconnect();
     _setStatus(RemoteViewerStatus.connecting);
@@ -90,6 +125,7 @@ class RemoteViewerController extends ChangeNotifier {
     }
   }
 
+  /// Leaves the session and forgets its screen.
   Future<void> disconnect() async {
     _generation++;
     await _subscription?.cancel();
@@ -210,6 +246,7 @@ class RemoteViewerController extends ChangeNotifier {
     logRevision.value++;
   }
 
+  /// Empties [logs].
   void clearLogs() {
     _logs.clear();
     logRevision.value++;
@@ -229,6 +266,7 @@ class RemoteViewerController extends ChangeNotifier {
       ..point(position),
   );
 
+  /// Scrolls by [delta] at [position], both in the app's logical pixels.
   void sendScroll(Offset position, Offset delta) => _send(
     ByteWriter(24)
       ..u8(MessageType.scroll)
@@ -236,12 +274,14 @@ class RemoteViewerController extends ChangeNotifier {
       ..point(delta),
   );
 
+  /// Types [text] into the focused text field of the app.
   void sendText(String text) => _send(
     ByteWriter()
       ..u8(MessageType.textInput)
       ..string(text),
   );
 
+  /// Presses one of the [RemoteKey]s.
   void sendKey(int key) => _send(
     ByteWriter(2)
       ..u8(MessageType.key)

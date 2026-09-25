@@ -23,6 +23,7 @@ enum RemoteSessionStatus {
   error,
 }
 
+/// Where a sharing session stands; see [RemoteControl.state].
 @immutable
 class RemoteSessionState {
   const RemoteSessionState({this.status = RemoteSessionStatus.idle, this.code, this.viewers = 0, this.error});
@@ -31,9 +32,14 @@ class RemoteSessionState {
 
   /// The code a viewer enters to join this session.
   final String? code;
+
+  /// How many viewers are watching.
   final int viewers;
+
+  /// Why the session failed, when [status] is [RemoteSessionStatus.error].
   final String? error;
 
+  /// Whether a session is open or being opened.
   bool get isRunning =>
       status == RemoteSessionStatus.connecting ||
       status == RemoteSessionStatus.waiting ||
@@ -50,6 +56,7 @@ class RemoteSessionState {
 class RemoteControl {
   RemoteControl._();
 
+  /// The app's single remote control.
   static final RemoteControl instance = RemoteControl._();
 
   /// Runs [body] with `print` output and uncaught errors captured, so they

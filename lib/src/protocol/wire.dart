@@ -29,6 +29,7 @@ abstract final class MessageType {
   static const int control = 50;
 }
 
+/// Phase of a pointer event sent by a viewer.
 abstract final class PointerPhase {
   static const int down = 0;
   static const int move = 1;
@@ -36,6 +37,7 @@ abstract final class PointerPhase {
   static const int cancel = 3;
 }
 
+/// Keys a viewer can press on the remote app. Text is sent separately.
 abstract final class RemoteKey {
   static const int backspace = 1;
   static const int enter = 2;
@@ -43,6 +45,8 @@ abstract final class RemoteKey {
   static const int arrowLeft = 4;
   static const int arrowRight = 5;
   static const int tab = 6;
+
+  /// The system back action, like Android's back button.
   static const int back = 7;
 }
 
