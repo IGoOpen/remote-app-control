@@ -33,8 +33,9 @@ migrate_working_dir/
 # Go relay build output
 server/bin/
 
-# Not part of the Dart package
-server/
-viewer/
-js/
-.github/
+# Not part of the Dart package. Anchored with a leading slash: a bare
+# "viewer/" would also match lib/src/viewer/.
+/server/
+/viewer/
+/js/
+/.github/
