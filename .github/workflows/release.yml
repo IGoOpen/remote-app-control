@@ -20,14 +20,21 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      # Skip versions already on pub.dev, e.g. the first one, published by hand.
+      - id: check
+        run: |
+          if curl -sf "https://pub.dev/api/packages/remote_app_control/versions/${GITHUB_REF_NAME#v}" > /dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
       # Provides the pub.dev OIDC credentials; Flutter's own Dart publishes.
-      - uses: dart-lang/setup-dart@v1
-      - uses: subosito/flutter-action@v2
+      - if: steps.check.outputs.published != 'true'
+        uses: dart-lang/setup-dart@v1
+      - if: steps.check.outputs.published != 'true'
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: flutter pub get
-      - run: flutter test
-      - run: dart pub publish --force
+      - if: steps.check.outputs.published != 'true'
+        run: flutter pub get && flutter test && dart pub publish --force
 
   npm:
     runs-on: ubuntu-latest
@@ -43,7 +50,12 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - run: npm ci
       - name: Check the package version matches the tag
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
-      - run: npm publish --access public --provenance
+      - id: check
+        run: |
+          if npm view "@igoopen/remote-app-control@${GITHUB_REF_NAME#v}" version > /dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.check.outputs.published != 'true'
+        run: npm ci && npm publish --access public --provenance
