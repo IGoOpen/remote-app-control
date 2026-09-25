@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
@@ -9,12 +8,9 @@ import 'package:remote_app_control/src/protocol/byte_buffer.dart';
 import 'package:remote_app_control/src/protocol/wire.dart';
 import 'package:remote_app_control/viewer.dart';
 
-/// A real font from the Flutter SDK, so the engine accepts it.
-Uint8List _robotoBytes() {
-  final root = Platform.environment['FLUTTER_ROOT'];
-  final file = File('$root/bin/cache/artifacts/material_fonts/roboto-regular.ttf');
-  return file.readAsBytesSync();
-}
+/// Stand-in font bytes. The cache logic only cares about content and
+/// hashes; the engine ignores data it cannot parse as a font.
+final Uint8List _fontBytes = Uint8List.fromList(List.generate(4096, (i) => (i * 31 + 7) & 0xff));
 
 class _FakeBundle extends CachingAssetBundle {
   _FakeBundle(this.assets);
@@ -30,7 +26,7 @@ class _FakeBundle extends CachingAssetBundle {
 }
 
 void main() {
-  final font = _robotoBytes();
+  final font = _fontBytes;
   final bundle = _FakeBundle({
     'FontManifest.json': utf8.encode(
       jsonEncode([
@@ -77,7 +73,7 @@ void main() {
     await tester.runAsync(() async {
       final registry = FontRegistry(bundle: bundle);
       final offer = (await registry.offersFor(['Brand']).toList()).single;
-      final hash = offer.sublist(offer.length - 32 - 3, offer.length - 3);
+      final hash = sha256.convert(font).bytes;
       final cache = MemoryFontCache();
 
       // First session: nothing cached, so the viewer asks for the file.
