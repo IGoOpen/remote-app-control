@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Remote App Viewer (JS)</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    body { margin: 0; height: 100vh; display: grid; grid-template-rows: auto 1fr; background: #111318; color: #e3e3e8; }
+    header { display: flex; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #2a2d35; flex-wrap: wrap; }
+    header h1 { font-size: 16px; font-weight: 600; margin: 0 12px 0 0; }
+    input, button { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid #3a3e48; background: #1c1f26; color: inherit; }
+    button { cursor: pointer; }
+    #code { width: 8ch; letter-spacing: 2px; }
+    #status { margin-left: auto; font-size: 13px; opacity: 0.8; }
+    main { display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
+    #screen { display: grid; place-items: center; background: #1c1f26; min-height: 0; overflow: hidden; padding: 16px; }
+    #logs { overflow: auto; font: 12px ui-monospace, monospace; padding: 8px; border-left: 1px solid #2a2d35; white-space: pre-wrap; }
+    #logs .error { color: #ff8a80; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 2fr 1fr; } #logs { border-left: 0; border-top: 1px solid #2a2d35; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Remote App Viewer <small style="opacity:.6">(TypeScript SDK)</small></h1>
+    <input id="server" size="22" aria-label="Server">
+    <input id="code" placeholder="Code" inputmode="numeric" aria-label="Support code">
+    <button id="connect">Connect</button>
+    <button id="back" title="Back (Esc)">Back</button>
+    <span id="status">Idle</span>
+  </header>
+  <main>
+    <div id="screen"></div>
+    <div id="logs"></div>
+  </main>
+  <script type="module" src="./dist/main.js"></script>
+</body>
+</html>

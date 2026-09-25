@@ -1,0 +1,49 @@
+# Publishes a release when a version tag (v1.2.3) is pushed.
+#
+# Both registries use trusted publishing (OIDC), so no secrets are stored.
+# Enable it once per registry after the first manual publish:
+#  - pub.dev: package Admin > Automated publishing > GitHub Actions,
+#    repository IGoOpen/remote-app-control, tag pattern v{{version}}.
+#  - npm: package Settings > Trusted publishing > GitHub Actions,
+#    workflow release.yml.
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+jobs:
+  pub-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      # Provides the pub.dev OIDC credentials; Flutter's own Dart publishes.
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter test
+      - run: dart pub publish --force
+
+  npm:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - name: Check the package version matches the tag
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: npm publish --access public --provenance

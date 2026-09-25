@@ -1,0 +1,36 @@
+{
+  "name": "@igoopen/remote-app-control",
+  "version": "0.0.1",
+  "description": "Watch and control Flutter apps shared with remote_app_control, from any web framework.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IGoOpen/remote-app-control.git",
+    "directory": "js"
+  },
+  "homepage": "https://github.com/IGoOpen/remote-app-control/tree/main/js#readme",
+  "bugs": "https://github.com/IGoOpen/remote-app-control/issues",
+  "keywords": ["flutter", "remote-control", "screen-sharing", "customer-support", "canvas"],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "demo": "esbuild demo/main.ts --bundle --format=esm --outfile=demo/dist/main.js --sourcemap",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
+  }
+}

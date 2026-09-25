@@ -1,0 +1,31 @@
+name: remote_app_control
+description: >-
+  Share a Flutter app with a remote viewer for customer support and debugging.
+  Streams the app's paint commands instead of video, and lets the viewer tap,
+  scroll, type and read logs.
+version: 0.0.1
+repository: https://github.com/IGoOpen/remote-app-control
+issue_tracker: https://github.com/IGoOpen/remote-app-control/issues
+topics:
+  - remote-control
+  - customer-support
+  - debugging
+  - screen-sharing
+  - devtools
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  crypto: ^3.0.6
+  web_socket_channel: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:

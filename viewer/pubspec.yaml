@@ -1,0 +1,21 @@
+name: remote_viewer
+description: Web and desktop viewer for apps shared with remote_app_control.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.0
+dependencies:
+  flutter:
+    sdk: flutter
+  # Icon fonts the viewer may need when rendering the remote app.
+  cupertino_icons: ^1.0.8
+  remote_app_control:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
